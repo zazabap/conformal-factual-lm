@@ -7,7 +7,7 @@ from sayless import query_model, say_less
 if __name__ == "__main__":
     OAI_KEY = os.environ.get("OAI_KEY")
     if OAI_KEY is None:
-        raise ValueError(
+        raise ValueError(  
             "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
         )
     openai_client = OpenAI(api_key=OAI_KEY)
