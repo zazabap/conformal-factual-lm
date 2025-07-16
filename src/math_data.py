@@ -27,7 +27,9 @@ CONFIDENCE_METHODS_RANKING = [
     "optimal-ranking",
 ]
 
-MODEL = "gpt-4"
+# MODEL = "gpt-4"
+MODEL = "llama3.1:8b"
+
 REQUIRED_FRAC_CORRECT = 1
 BREAKDOWN_PROMPT = "Please breakdown the following input into a set of small, independent claims (make sure not to add any information), and return the output as a jsonl, where each line is {subclaim:[CLAIM], gpt-score:[CONF]}.\n The confidence score [CONF] should represent your confidence in the claim, where a 1 is obvious facts and results like 'The earth is round' and '1+1=2'. A 0 is for claims that are very obscure or difficult for anyone to know, like the birthdays of non-notable people. If the input is short, it is fine to only return 1 claim. The input is: "
 
@@ -45,15 +47,21 @@ if __name__ == "__main__":
         return f"You will get a math problem and a set of steps that are true. Construct an answer using ONLY the steps provided. Make sure to include all the steps in the answer, and do not add any additional steps or reasoning. These steps may not fully solve the problem, but merging them could assist someone in solving the problem. \n\nThe steps:\n{claim_string}\n\nThe math problem:\n{prompt}. Remember, do not do any additional reasoning, just combine the given steps."
 
     # Get Open AI key.
-    OAI_KEY = os.environ.get("OAI_KEY")
-    if OAI_KEY is None:
-        raise ValueError(
-            "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
-        )
-    OPENAI_CLIENT = OpenAI(api_key=OAI_KEY)
+    # OAI_KEY = os.environ.get("OAI_KEY")
+    # if OAI_KEY is None:
+    #     raise ValueError(
+    #         "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
+    #     )
+    # OPENAI_CLIENT = OpenAI(api_key=OAI_KEY)
+
+    OPENAI_CLIENT = OpenAI(
+        base_url="http://localhost:11434/v1",
+        api_key='ollama',
+    )
 
     # Load questions from math
-    dataset = load_dataset("competition_math")
+    # dataset = load_dataset("competition_math")
+    dataset = load_dataset("nlile/hendrycks-MATH-benchmark")
     input_dataset = [question["problem"] for question in dataset["test"]][0:50]
     with io.open("out/MATH.json", "w") as fopen:
         json.dump(dataset["test"][0:50], fopen, indent=4)

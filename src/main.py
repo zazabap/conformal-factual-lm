@@ -25,7 +25,9 @@ if __name__ == "__main__":
     output = query_model(openai_client, prompt, model)
     # Copied threshold from /factscore_a=1_alpha=0.15_conf=frequency+gpt.txt.
     # Compute new ones by running factscore.py with desired parameters and setting compute_single_threshold=True
-    threshold = 4.8998812119930735
+    # threshold = 4.8998812119930735
+    threshold = 0.5  # Set to 0.5 for testing purposes
+
     merged_output, (accepted_subclaims, all_subclaims) = say_less(
         openai_client, prompt, model, output, threshold
     )

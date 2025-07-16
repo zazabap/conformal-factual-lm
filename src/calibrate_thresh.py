@@ -387,7 +387,7 @@ def generate_merged_outputs(
     merge_prompt,
 ):
     """
-    Creates jsonl file with original output and new suclaims.
+    Creates jsonl file with original output and new subclaims.
     """
     print(
         f"Merging accepted subclaims for a={a}, alpha={alpha} and confidence_method={confidence_method}"

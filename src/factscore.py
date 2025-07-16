@@ -33,12 +33,18 @@ if __name__ == "__main__":
     ]
 
     # Get Open AI key.
-    OAI_KEY = os.environ.get("OAI_KEY")
-    if OAI_KEY is None:
-        raise ValueError(
-            "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
-        )
-    OPENAI_CLIENT = OpenAI(api_key=OAI_KEY)
+    # OAI_KEY = os.environ.get("OAI_KEY")
+    # if OAI_KEY is None:
+    #     raise ValueError(
+    #         "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
+    #     )
+    # OPENAI_CLIENT = OpenAI(api_key=OAI_KEY)
+
+
+    OPENAI_CLIENT = OpenAI(
+        base_url="http://localhost:11434/v1",
+        api_key='ollama',
+    )
 
     # Load names from Factscore dataset.
     with io.open("data/factscore_names.txt", "r") as fopen:
