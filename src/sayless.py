@@ -23,7 +23,10 @@ def say_less(client, prompt, model, output, threshold):
     in get_frequency_scores.
     """
     subclaims = get_subclaims(client, output, model)
-
+    if subclaims is None:
+        raise ValueError("Failed to extract subclaims")
+    print(f"Extracted {len(subclaims)} subclaims.")
+    print(subclaims[0])
     frequency_scores = get_frequency_scores(client, subclaims, prompt, 5, model)
     for i, subclaim in enumerate(subclaims):
         subclaim["frequency-score"] = frequency_scores[i]
@@ -58,24 +61,40 @@ def get_subclaims(
             "content": breakdown_prompt + output,
         },
     ]
-    # TODO: use query_model function here instead.
     completion = client.chat.completions.create(
         model=model, messages=messages, max_tokens=max_tokens, temperature=temperature
     )
     output = completion.choices[0].message.content
-    output = output.replace("```jsonl\n", "")
-    output = output.replace("\\", "\\\\")
-    subclaims = output.replace("```", "")
+    print("Subclaims output:", output)
+    print("extracting subclaims...")
+    subclaims = extract_text_between_backticks(output)
+    print(subclaims)
 
-    # Parse as jsonl.
+    # output = output.replace("```jsonl\n", "")
+    # output = output.replace("\\", "\\\\")
+    # subclaims = output.replace("```", "")
+
+    # Parse as jsonl and normalize subclaims.
     try:
-        subclaims = [json.loads(line) for line in subclaims.splitlines() if line]
+        subclaims = convert_text_to_json(subclaims)
+        # subclaims = [json.loads(line) for line in subclaims.splitlines() if line]
+        # subclaims = normalize_subclaims(subclaims)  # Normalize subclaims to handle lists
         return subclaims
     except Exception as ex:
         print(ex)
         print("Failed to parse as jsonl")
-        print(subclaims)
-        return None
+        # print(subclaims)
+        return []
+
+
+## String manipulation for extracting text between backticks.
+def extract_text_between_backticks(text):
+    """
+    Extracts the text between triple backticks.
+    """
+    start = text.find("```") + 3  # Find the start of the text after the first ```
+    end = text.rfind("```")  # Find the last occurrence of ```
+    return text[start:end].strip() if start >= 3 and end > start else None
 
 
 def get_frequency_scores(client, subclaims, prompt, n_samples, model):
@@ -143,3 +162,54 @@ def merge_subclaims(
         else "Abstain."
     )
     return output
+
+
+def convert_text_to_json(text):
+    """
+    Converts text containing subclaims and gpt-scores into a JSON structure.
+    """
+    try:
+        # Split the text into lines and parse each line as JSON
+        subclaims = [json.loads(line) for line in text.splitlines() if line]
+        
+        # Normalize subclaims to ensure single values for subclaim and gpt-score
+        normalized_subclaims = []
+        for sc in subclaims:
+            new_sc = {}
+            # Extract string from list if needed
+            if isinstance(sc.get("subclaim"), list):
+                new_sc["subclaim"] = sc["subclaim"][0]
+            else:
+                new_sc["subclaim"] = sc.get("subclaim")
+            # Extract float from list if needed
+            if isinstance(sc.get("gpt-score"), list):
+                new_sc["gpt-score"] = sc["gpt-score"][0]
+            else:
+                new_sc["gpt-score"] = sc.get("gpt-score")
+            normalized_subclaims.append(new_sc)
+        
+        return normalized_subclaims
+    except Exception as ex:
+        print(f"Failed to convert text to JSON: {ex}")
+        return []
+
+
+# def normalize_subclaims(subclaims):
+#     """
+#     Converts subclaims with list values to single values.
+#     """
+#     normalized = []
+#     for sc in subclaims:
+#         new_sc = {}
+#         # Extract string from list if needed
+#         if isinstance(sc.get("subclaim"), list):
+#             new_sc["subclaim"] = sc["subclaim"][0]
+#         else:
+#             new_sc["subclaim"] = sc.get("subclaim")
+#         # Extract float from list if needed
+#         if isinstance(sc.get("gpt-score"), list):
+#             new_sc["gpt-score"] = sc["gpt-score"][0]
+#         else:
+#             new_sc["gpt-score"] = sc.get("gpt-score")
+#         normalized.append(new_sc)
+#     return normalized

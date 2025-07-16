@@ -5,14 +5,23 @@ from openai import OpenAI
 from sayless import query_model, say_less
 
 if __name__ == "__main__":
-    OAI_KEY = os.environ.get("OAI_KEY")
-    if OAI_KEY is None:
-        raise ValueError(  
-            "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
-        )
-    openai_client = OpenAI(api_key=OAI_KEY)
+    # OAI_KEY = os.environ.get("OAI_KEY")
+    # if OAI_KEY is None:
+    #     raise ValueError(  
+    #         "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
+    #     )
+
+    # Switch to Ollama 
+    openai_client = OpenAI(
+        base_url="http://localhost:11434/v1",
+        api_key='ollama',
+    )
+    # openai_client = OpenAI(api_key=OAI_KEY)
     prompt = "Tell me a paragraph bio of Percy Liang"
-    model = "gpt-4"
+    # model = "gpt-4"
+    # model = "llama2:7b"
+    # model = "deepseek-r1:8b"
+    model = "llama3.1:8b"
     output = query_model(openai_client, prompt, model)
     # Copied threshold from /factscore_a=1_alpha=0.15_conf=frequency+gpt.txt.
     # Compute new ones by running factscore.py with desired parameters and setting compute_single_threshold=True
