@@ -16,6 +16,7 @@ import random
 
 CORRECT_ANNOTATIONS = ["Y", "S"]
 
+MODEL = "llama3.1:8b"  # Default model, can be overridden in function calls.
 
 def get_legend_name(confidence_method):
     if (
@@ -26,7 +27,7 @@ def get_legend_name(confidence_method):
     elif confidence_method == "baseline" or confidence_method == "baseline-ranking":
         return "Ordinal"
     elif confidence_method == "gpt" or confidence_method == "gpt-ranking":
-        return "GPT-4 confidence"
+        return MODEL+"confidence"
     elif confidence_method == "random" or confidence_method == "random-ranking":
         return "Random"
     elif confidence_method == "optimal" or confidence_method == "optimal-ranking":
@@ -65,8 +66,12 @@ def get_ranking(entry, confidence_method, use_percent=True):
     """
     Returns the corresponding ranking scores from the raw scores of confidence_method.
     """
+    # for subclaim in entry["claims"]:
+    #     print(type(subclaim[confidence_method + "-score"]))
+    #     print(type(subclaim["noise"]))
+
     score_list = [
-        -(subclaim[confidence_method + "-score"] + subclaim["noise"])
+        -(float(subclaim[confidence_method + "-score"]) + float(subclaim["noise"]))
         for subclaim in entry["claims"]
     ]
     rankings = len(entry["claims"]) + 1 - rankdata(score_list, method="ordinal")
@@ -152,9 +157,10 @@ def get_r_score(entry, confidence_method, a):
     """
     Compute the r_a score for entry when confidence_method is used as the sub-claim scoring function.
     """
+    # print(f"Computing r_a for {entry['prompt']} with {confidence_method} method")
     threshold_set = sorted(
         [
-            subclaim[confidence_method + "-score"] + subclaim["noise"]
+            float(subclaim[confidence_method + "-score"]) + float(subclaim["noise"])
             for subclaim in entry["claims"]
         ],
         reverse=True,
@@ -166,7 +172,7 @@ def get_r_score(entry, confidence_method, a):
         accepted_subclaims = [
             subclaim
             for subclaim in entry["claims"]
-            if subclaim[confidence_method + "-score"] + subclaim["noise"] >= threshold
+            if float(subclaim[confidence_method + "-score"]) + float(subclaim["noise"]) >= threshold
         ]
 
         # Compute entailed/correct fraction.
@@ -228,7 +234,7 @@ def create_correctness_vs_removed_plot(
                 accepted_subclaims = [
                     subclaim
                     for subclaim in test_data["claims"]
-                    if subclaim[confidence_method + "-score"] + subclaim["noise"]
+                    if float(subclaim[confidence_method + "-score"])+ float(subclaim["noise"])
                     >= threshold
                 ]
                 fraction_removed = 1 - len(accepted_subclaims) / len(
@@ -236,7 +242,7 @@ def create_correctness_vs_removed_plot(
                 )
                 entailed_fraction = (
                     np.mean(
-                        [
+                        [ 
                             subclaim["annotation"] in CORRECT_ANNOTATIONS
                             for subclaim in accepted_subclaims
                         ]

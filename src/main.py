@@ -10,13 +10,13 @@ if __name__ == "__main__":
     #     raise ValueError(  
     #         "OpenAI key is not set - please set OAI_KEY to your OpenAI key (with command: export OAI_KEY=[OAI_KEY])"
     #     )
+    # openai_client = OpenAI(api_key=OAI_KEY)
 
     # Switch to Ollama 
     openai_client = OpenAI(
         base_url="http://localhost:11434/v1",
         api_key='ollama',
     )
-    # openai_client = OpenAI(api_key=OAI_KEY)
     prompt = "Tell me a paragraph bio of Percy Liang"
     # model = "gpt-4"
     # model = "llama2:7b"

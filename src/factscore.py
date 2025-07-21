@@ -7,7 +7,8 @@ import numpy as np
 from calibrate_thresh import analyze_dataset
 
 if __name__ == "__main__":
-    MODEL = "gpt-4"
+    # MODEL = "gpt-4"
+    MODEL = "llama3.1:8b"
     REQUIRED_FRAC_CORRECT = 0.96
     BREAKDOWN_PROMPT = "Please breakdown the following input into a set of small, independent claims, and return the output as a jsonl, where each line is {subclaim:[CLAIM], gpt-score:[CONF]}.\n The confidence score [CONF] should represent your confidence in the claim, where a 1 is obvious facts and results like 'The earth is round' and '1+1=2'. A 0 is for claims that are very obscure or difficult for anyone to know, like the birthdays of non-notable people. The input is: "
 
